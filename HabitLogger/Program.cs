@@ -61,10 +61,10 @@ Type 4 to update record.
                 case "2":
                     Insert();
                     break;
-               /* case "3":
-                    Delete();
+                case "3":
+                    DeleteRecord();
                     break;
-                case "4":
+               /* case "4":
                     Update();
                     break;*/
                 default:
@@ -152,6 +152,37 @@ Type 4 to update record.
             }
             Console.WriteLine("-------------------------------------------------\n");
 
+        }
+    }
+
+    private static void DeleteRecord()
+    {
+        Console.Clear();
+        GetAllRecords();
+
+        var recordId = GetNumberInput("\nPlease type the Id of the record you want to delete or type 0 to return to main menu.");
+
+        if (recordId == 0)
+        {
+            GetUserInput();
+        }
+
+        using (var connection = new SqliteConnection(connectionString))
+        {
+            connection.Open();
+            var tableCmd = connection.CreateCommand();
+            tableCmd.CommandText = $"DELETE from drinking_water WHERE Id = '{recordId}'";
+
+            int rowCount = tableCmd.ExecuteNonQuery();
+
+            if (rowCount == 0)
+            {
+                Console.WriteLine($"\nRecord with Id {recordId} doesn't exist;\n");
+                DeleteRecord();
+            }
+
+            Console.WriteLine($"\nRecord with Id {recordId} was deleted \n");
+            GetUserInput();
         }
     }
 
