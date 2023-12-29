@@ -4,6 +4,8 @@ using System.Numerics;
 using System;
 using System.Runtime.CompilerServices;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Globalization;
+using System.Data;
 
 class Program
 {
@@ -53,12 +55,13 @@ Type 4 to update record.
                     Console.WriteLine("\nGoodbye!\n");
                     closeApp = true;
                     break;
-                case "1":                 
+                case "1":
+                    GetAllRecords();
                     break;
                 case "2":
                     Insert();
                     break;
-                /*case "3":
+               /* case "3":
                     Delete();
                     break;
                 case "4":
@@ -107,7 +110,56 @@ Type 4 to update record.
         int finalInput = Convert.ToInt32(numberInput);
 
         return finalInput;
-
     }
 
+    static void GetAllRecords()
+    {
+        Console.Clear();
+        using(var connection = new SqliteConnection(connectionString))
+        {
+            connection.Open();
+            var tableCmd = connection.CreateCommand();
+            tableCmd.CommandText =
+                $"SELECT * FROM drinking_water ";
+
+            List<DrinkingWater> tableData = new();
+
+            SqliteDataReader reader = tableCmd.ExecuteReader();
+
+            if (reader.HasRows)
+            {
+                while (reader.Read())
+                {
+                    tableData.Add(
+                        new DrinkingWater
+                        {
+                            Id = reader.GetInt32(0),
+                            Date = DateTime.ParseExact(reader.GetString(1), "dd-MM-yy", new CultureInfo("en-US")),
+                            Quantity = reader.GetInt32(2),
+                        });
+                }
+            } else
+            {
+                Console.WriteLine("No rows found");
+            }
+
+            connection.Close();
+
+            Console.WriteLine("-------------------------------------------------\n");
+            foreach (var dw in tableData)
+            {
+                Console.WriteLine($"{dw.Id} - {dw.Date.ToString("dd-MM-yyyy")} - Quantity: {dw.Quantity}");
+            }
+            Console.WriteLine("-------------------------------------------------\n");
+
+        }
+    }
+
+}
+
+public class DrinkingWater
+{
+    public int Id { get; set; }
+    public DateTime Date { get; set; }
+    public int Quantity { get; set; }
 }
