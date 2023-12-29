@@ -180,7 +180,8 @@ Type 4 to update record.
                 DeleteRecord();
             }
 
-            Console.WriteLine($"\nRecord with Id {recordId} was deleted \n");
+            Console.WriteLine($"\nRecord with Id {recordId} was deleted. Click Enter to continue. \n");
+            Console.ReadLine();
             GetUserInput();
         }
     }
