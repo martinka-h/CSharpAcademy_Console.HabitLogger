@@ -52,7 +52,6 @@ Type 4 to update record.
             switch (command)
             {
                 case "0":
-                    Console.WriteLine("\nGoodbye!\n");
                     closeApp = true;
                     break;
                 case "1":
@@ -64,15 +63,15 @@ Type 4 to update record.
                 case "3":
                     DeleteRecord();
                     break;
-               /* case "4":
-                    Update();
-                    break;*/
+               case "4":
+                    UpdateRecord();
+                    break;
                 default:
                     Console.WriteLine("\nInvalid Command. Please type a number from 0 to 4.\n");
                     break;
             }
         }
-    }
+    } 
     static void Insert()
     {
         string date = GetDateInput();
@@ -182,6 +181,43 @@ Type 4 to update record.
             }
 
             Console.WriteLine($"\nRecord with Id {recordId} was deleted \n");
+            GetUserInput();
+        }
+    }
+
+    static void UpdateRecord()
+    {
+        Console.Clear();
+        GetAllRecords();
+
+        var recordId = GetNumberInput("\nPlease type the Id of the record you would like to update.Type 0 to return to main menu.\n");
+
+        using (var connection = new SqliteConnection(connectionString))
+        {
+            connection.Open();
+
+            var checkCmd = connection.CreateCommand();
+            checkCmd.CommandText = $"SELECT EXISTS(SELECT 1 FROM drinking_water WHERE Id = {recordId})";
+            int checkQuery = Convert.ToInt32(checkCmd.ExecuteScalar());
+
+            if (checkQuery == 0)
+            {
+                Console.WriteLine($"\nRecord with Id {recordId} doesn't exist.\n");
+                connection.Close();
+                UpdateRecord();
+            }
+
+            string date = GetDateInput();
+            int quantity = GetNumberInput("\nPlease insert the number of glasses or other measure of your choice (no decimals allowed). Type 0 to return to main menu.\n");
+
+            var tableCmd = connection.CreateCommand();
+            tableCmd.CommandText = $"UPDATE drinking_water SET date = '{date}', quantity = {quantity} WHERE Id = {recordId}";
+            Console.WriteLine("The record was updated. Press Enter to continue.");
+
+            tableCmd.ExecuteNonQuery();
+            connection.Close();
+
+            Console.ReadLine();
             GetUserInput();
         }
     }
