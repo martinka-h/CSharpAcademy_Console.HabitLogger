@@ -1,11 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
-using System.Collections.Generic;
-using System.Numerics;
-using System;
-using System.Runtime.CompilerServices;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Globalization;
-using System.Data;
 
 class Program
 {
@@ -53,6 +47,7 @@ Type 4 to update record.
             {
                 case "0":
                     closeApp = true;
+                    Environment.Exit(0);
                     break;
                 case "1":
                     GetAllRecords();
@@ -88,29 +83,6 @@ Type 4 to update record.
         }
     }
 
-    static string GetDateInput()
-    {
-        Console.WriteLine("\n\nPlease insert the date: (Format: dd-mm-yy). Type 0 to return to main menu.");
-        string? dateInput = Console.ReadLine();
-
-        if (dateInput == "0") GetUserInput();
-
-        return dateInput;
-    }
-
-    static int GetNumberInput(string message)
-    {
-        Console.WriteLine(message);
-
-        string? numberInput = Console.ReadLine();
-
-        if (numberInput == "0") GetUserInput();
-
-        int finalInput = Convert.ToInt32(numberInput);
-
-        return finalInput;
-    }
-
     static void GetAllRecords()
     {
         Console.Clear();
@@ -133,7 +105,7 @@ Type 4 to update record.
                         new DrinkingWater
                         {
                             Id = reader.GetInt32(0),
-                            Date = DateTime.ParseExact(reader.GetString(1), "dd-MM-yy", new CultureInfo("en-US")),
+                            Date = DateTime.ParseExact(reader.GetString(1), "dd-MM-yyyy", new CultureInfo("en-US")),
                             Quantity = reader.GetInt32(2),
                         });
                 }
@@ -222,7 +194,39 @@ Type 4 to update record.
             GetUserInput();
         }
     }
+    static string GetDateInput()
+    {
+        Console.WriteLine("\n\nPlease insert the date: (Format: dd-MM-yyyy). Type 0 to return to main menu.");
+        string? dateInput = Console.ReadLine();
 
+        if (dateInput == "0") GetUserInput();
+
+        while (!DateTime.TryParseExact(dateInput, "dd-MM-yyyy", new CultureInfo("en-US"), DateTimeStyles.None, out _))
+        {
+            Console.WriteLine("\nInvalid date. (Format: dd-MM-yyyy). Type 0 to return to main menu or try again.");
+            dateInput = Console.ReadLine();
+        }
+
+        return dateInput;
+    }
+
+    static int GetNumberInput(string message)
+    {
+        Console.WriteLine(message);
+
+        string? numberInput = Console.ReadLine();
+
+        if (numberInput == "0") GetUserInput();
+
+        while (!Int32.TryParse(numberInput, out _) || Convert.ToInt32(numberInput) < 0)
+        {
+            Console.WriteLine("\nInvalid number. Try again.\n");
+        }
+
+        int finalInput = Convert.ToInt32(numberInput);
+
+        return finalInput;
+    }
 }
 
 public class DrinkingWater
